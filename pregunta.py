@@ -17,5 +17,45 @@ def ingest_data():
     #
     # Inserte su código aquí
     #
+    df_buffer = {"cluster": [],
+         "cantidad_de_palabras_clave": [],
+         "porcentaje_de_palabras_clave": [],
+         "principales_palabras_clave": []
+        }
+
+    with open("clusters_report.txt", "r") as file:
+        no_title_file = file.readlines()[4:]
+
+        main_keywords = str()
+        for line in no_title_file:
+            cluster_num = line[3:5].strip()
+            keyword_num = line[9:12].strip()
+            keyword_pct = line[25:31].strip().rstrip(" %").replace(",", ".")
+            main_keywords += line[41:]
+
+            if cluster_num.isdigit():
+                df_buffer["cluster"].append(int(cluster_num))
+
+            if keyword_num.isdigit():
+                df_buffer["cantidad_de_palabras_clave"].append(int(keyword_num))
+
+            if keyword_pct.replace(".","").isdigit():
+                df_buffer["porcentaje_de_palabras_clave"].append(float(keyword_pct))
+
+            if main_keywords.strip().endswith(".") or main_keywords.strip().endswith("control"):  # Las palabras clave terminan en este caso en "." o en "control"
+
+                main_keywords = main_keywords.replace(".", "")
+
+                for i in range(5, 1, -1):                                                         # Los espacios más grandes son de 5.
+                    main_keywords = main_keywords.replace(" " * i, " ")
+
+                main_keywords.replace("\n", " ")
+                df_buffer["principales_palabras_clave"].append(main_keywords.strip())
+                main_keywords = str()
+
+    df = pd.DataFrame(df_buffer)
 
     return df
+
+# print(ingest_data())
+
